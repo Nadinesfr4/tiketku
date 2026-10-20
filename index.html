@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="TiketKu: demo booking hotel, kereta api, dan pesawat untuk belajar struktur data (array, struct, pointer, sorting, searching).">
+  <title>TiketKu — Booking Hotel, Kereta Api & Pesawat</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#hasil">Lewati ke hasil pencarian</a>
+
+  <!-- ============ HEADER ============ -->
+  <header class="site-header">
+    <div class="wrap head-in">
+      <a class="logo" href="#top" aria-label="TiketKu, kembali ke atas">
+        <span class="logo-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a2 2 0 0 0 0 6v3h18v-3a2 2 0 0 1 0-6V6H3z"/></svg>
+        </span>
+        <span class="logo-text">tiket<i>ku</i></span>
+      </a>
+      <nav class="nav" aria-label="Navigasi utama">
+        <a href="#cari" data-cat="hotel">Hotel</a>
+        <a href="#cari" data-cat="kereta">Kereta Api</a>
+        <a href="#cari" data-cat="pesawat">Pesawat</a>
+        <a href="#pesanan">Pesanan Saya</a>
+        <a href="#inspector">Memory Inspector</a>
+      </nav>
+      <a class="pill-btn" href="#pesanan">Pesanan <b id="badgeCount">0</b></a>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- ============ HERO + PROMO ============ -->
+    <section class="hero" aria-labelledby="heroTitle">
+      <div class="wrap hero-in">
+        <div>
+          <h1 id="heroTitle">Mau berangkat ke mana hari ini?</h1>
+          <p>Bandingkan harga, pilih yang cocok, lalu pesan hotel, kereta api, atau pesawat dalam satu tempat.</p>
+        </div>
+        <ul class="promos" aria-label="Promo hari ini">
+          <li class="promo"><span class="tag">20%</span><div><b>Diskon hotel akhir pekan</b><span>Khusus kota wisata pilihan</span></div></li>
+          <li class="promo"><span class="tag">KA</span><div><b>Kereta api mulai Rp150.000</b><span>Gambir ke Bandung, setiap pagi</span></div></li>
+          <li class="promo"><span class="tag">%</span><div><b>Cashback tiket pesawat</b><span>Berlaku untuk rute domestik</span></div></li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="wrap">
+      <!-- ============ KARTU PENCARIAN + TAB ============ -->
+      <section class="search-card" id="cari" aria-label="Cari layanan">
+        <div class="tabs" role="tablist" aria-label="Kategori layanan">
+          <button class="tab" role="tab" id="tab-hotel" data-cat="hotel" aria-selected="true" aria-controls="hasil">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v16"/><path d="M15 10h4a1 1 0 0 1 1 1v10"/><path d="M2 21h20M8 8h3M8 12h3M8 16h3"/></svg>
+            Hotel
+          </button>
+          <button class="tab" role="tab" id="tab-kereta" data-cat="kereta" aria-selected="false" aria-controls="hasil">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="14" rx="3"/><path d="M5 11h14M8 21l2-4M16 21l-2-4"/><circle cx="9" cy="14" r=".6"/><circle cx="15" cy="14" r=".6"/></svg>
+            Kereta Api
+          </button>
+          <button class="tab" role="tab" id="tab-pesawat" data-cat="pesawat" aria-selected="false" aria-controls="hasil">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.8 19.2 16 11l3.5-3.5a2.1 2.1 0 0 0-3-3L13 8 4.8 6.2 3.4 7.6l6.4 3.6-3.1 3.1-2.9-.4L2.4 15.5l4.1 1.9 1.9 4.1 1.6-1.4-.4-2.9 3.1-3.1 3.6 6.4z"/></svg>
+            Pesawat
+          </button>
+        </div>
+        <form class="search-form" id="searchForm" role="search" novalidate>
+          <div class="field">
+            <label for="q" id="qLabel">Cari hotel</label>
+            <input id="q" type="text" autocomplete="off" inputmode="search">
+          </div>
+          <button class="btn blue" id="btnSearch" type="submit">Cari</button>
+          <p class="hint">Ketik nama atau lokasi, mis. <code>bandung</code>. Ketik angka untuk mencari harga sampai angka itu, mis. <code>500000</code>.</p>
+        </form>
+      </section>
+
+      <!-- ============ FILTER + HASIL ============ -->
+      <div class="layout">
+        <aside class="filters" aria-label="Filter hasil">
+          <div class="filters-head">
+            <h2>Filter</h2>
+            <button class="link-btn" type="button" id="btnResetFilter">Atur ulang</button>
+          </div>
+
+          <fieldset class="f-group">
+            <legend>Rentang harga</legend>
+            <div class="dual" id="dual">
+              <span class="dual-track" aria-hidden="true"></span>
+              <span class="dual-fill" aria-hidden="true"></span>
+              <input type="range" id="minHarga" aria-label="Harga minimum">
+              <input type="range" id="maxHarga" aria-label="Harga maksimum">
+            </div>
+            <p class="range-out"><output id="minOut" for="minHarga">Rp0</output><span aria-hidden="true">sampai</span><output id="maxOut" for="maxHarga">Rp0</output></p>
+          </fieldset>
+
+          <fieldset class="f-group">
+            <legend>Rating minimal</legend>
+            <div class="rate-opts">
+              <label><input type="radio" name="rating" value="0" checked><span>Semua</span></label>
+              <label><input type="radio" name="rating" value="4"><span>★ 4.0+</span></label>
+              <label><input type="radio" name="rating" value="4.5"><span>★ 4.5+</span></label>
+              <label><input type="radio" name="rating" value="4.7"><span>★ 4.7+</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="f-group">
+            <legend>Ketersediaan</legend>
+            <label class="check"><input type="checkbox" id="onlyAvail"><span>Hanya yang tersedia</span></label>
+          </fieldset>
+        </aside>
+
+        <section class="results" id="hasil" aria-labelledby="listTitle" tabindex="-1">
+          <div class="results-head">
+            <div>
+              <h2 id="listTitle">Hotel tersedia</h2>
+              <p class="count" id="resultCount" aria-live="polite"></p>
+            </div>
+            <div class="sort-bar">
+              <div class="field">
+                <label for="sortMode">Urutkan</label>
+                <select id="sortMode">
+                  <option value="harga-asc">Harga termurah</option>
+                  <option value="harga-desc">Harga termahal</option>
+                  <option value="rating-desc">Rating tertinggi</option>
+                </select>
+              </div>
+              <button class="btn blue" id="btnSort" type="button">Urutkan</button>
+              <button class="btn ghost" id="btnReset" type="button">Reset</button>
+            </div>
+          </div>
+
+          <ul class="chips" id="chips" aria-label="Kriteria aktif"></ul>
+          <div class="grid" id="grid"></div>
+        </section>
+      </div>
+
+      <!-- ============ PESANAN SAYA ============ -->
+      <section class="section" id="pesanan" aria-labelledby="pesananTitle">
+        <div class="sec-head">
+          <div>
+            <h2 id="pesananTitle">Pesanan saya</h2>
+            <p>Jumlah pesanan: <b id="bookLen">0</b></p>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th scope="col">Tiket</th><th scope="col">ID Booking</th><th scope="col">Pemesan</th><th scope="col">Tanggal</th><th scope="col">Jumlah</th><th scope="col">Total</th><th scope="col">Status</th><th scope="col"><span class="sr-only">Aksi</span></th></tr>
+            </thead>
+            <tbody id="bookBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ============ DEBUGGER & MEMORY INSPECTOR ============ -->
+      <section class="section" id="inspector" aria-labelledby="inspTitle">
+        <div class="sec-head">
+          <div>
+            <h2 id="inspTitle">Debugger &amp; Memory Inspector</h2>
+            <p>Lihat isi array di memori beserta alamat pointer fiktifnya. Jalankan <b>Urutkan</b> atau <b>Cari</b> untuk melihatnya bergerak.</p>
+          </div>
+        </div>
+
+        <div class="insp-grid">
+          <article class="panel panel-wide">
+            <header class="panel-head">
+              <h3>Array di memori</h3>
+              <p class="meta" id="memMeta"></p>
+            </header>
+            <div class="mem" id="memArray"></div>
+            <ul class="legend" aria-label="Arti warna">
+              <li class="l-cmp">Dibandingkan</li><li class="l-swap">Ditukar</li><li class="l-found">Cocok</li><li class="l-sorted">Posisi final</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>TiketKu adalah proyek demo untuk belajar struktur data. Tidak ada transaksi nyata, dan data hanya tersimpan selama halaman terbuka.</p>
+      <p>Foto dari Unsplash.</p>
+    </div>
+  </footer>
+
+  <!-- ============ TERMINAL LOG ALGORITMA (dock bawah) ============ -->
+  <section class="dock" id="dock" aria-label="Terminal Log Algoritma" data-open="false">
+    <div class="dock-bar">
+      <button class="dock-toggle" id="dockToggle" type="button" aria-expanded="false" aria-controls="dockBody">
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg>
+        <span>Terminal Log Algoritma</span>
+        <span class="term-status" id="termStatus">IDLE</span>
+      </button>
+      <div class="dock-actions">
+        <label class="speed">Kecepatan
+          <select id="speed">
+            <option value="0">Instan</option>
+            <option value="50" selected>Cepat</option>
+            <option value="130">Normal</option>
+            <option value="350">Lambat</option>
+          </select>
+        </label>
+        <button class="term-btn" id="btnSkip" type="button" hidden>Lewati</button>
+        <button class="term-btn" id="btnClear" type="button">Clear Log</button>
+      </div>
+    </div>
+    <div class="dock-body" id="dockBody">
+      <div class="term" id="termLog" role="log" aria-label="Log langkah algoritma" tabindex="0"></div>
+      <p class="term-foot" id="termStats">Belum ada algoritma yang dijalankan.</p>
+    </div>
+  </section>
+
+  <!-- ============ MODAL BOOKING ============ -->
+  <dialog id="dlg" aria-labelledby="dlgTitle">
+    <div id="viewForm">
+      <form id="bookForm" novalidate>
+        <header class="dlg-head">
+          <h3 id="dlgTitle">Detail pesanan</h3>
+          <button class="x-btn" type="button" id="dlgClose" aria-label="Tutup">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+          </button>
+        </header>
+        <div class="dlg-body">
+          <div class="dlg-sum" id="dlgSum"></div>
+
+          <div class="field">
+            <label for="fNama">Nama pemesan</label>
+            <input id="fNama" type="text" placeholder="Sesuai kartu identitas" autocomplete="name">
+            <p class="err-msg" id="errNama" hidden>Nama pemesan wajib diisi.</p>
+          </div>
+          <div class="two">
+            <div class="field">
+              <label for="fTgl" id="fTglLabel">Tanggal</label>
+              <input id="fTgl" type="date">
+            </div>
+            <div class="field">
+              <span class="lbl" id="fJmlLabel">Jumlah</span>
+              <div class="stepper" role="group" aria-labelledby="fJmlLabel">
+                <button type="button" id="btnMin" aria-label="Kurangi">−</button>
+                <input id="fJml" type="number" min="1" max="10" value="1" aria-labelledby="fJmlLabel">
+                <button type="button" id="btnPlus" aria-label="Tambah">+</button>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label for="fMetode">Metode pembayaran</label>
+            <select id="fMetode">
+              <option>Transfer bank</option>
+              <option>E-wallet</option>
+              <option>Kartu kredit</option>
+              <option>Bayar di gerai</option>
+            </select>
+          </div>
+
+          <dl class="price-box">
+            <div><dt id="rowHarga">Harga</dt><dd id="rowHargaVal">Rp0</dd></div>
+            <div class="grand"><dt>Total pembayaran</dt><dd id="fTotal">Rp0</dd></div>
+          </dl>
+        </div>
+        <footer class="dlg-foot">
+          <button class="btn ghost" type="button" id="dlgCancel">Batal</button>
+          <button class="btn blue" type="submit">Konfirmasi pesanan</button>
+        </footer>
+      </form>
+    </div>
+
+    <div id="viewDone" hidden>
+      <div class="done">
+        <span class="done-ico" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+        </span>
+        <h3>Pesanan berhasil dibuat</h3>
+        <p class="muted">Simpan ID Booking berikut untuk check-in atau boarding.</p>
+        <p class="done-id" id="doneId">BK-000-0000</p>
+        <div class="dlg-sum" id="doneSum"></div>
+        <div class="done-actions">
+          <button class="btn ghost" type="button" id="doneClose">Tutup</button>
+          <button class="btn blue" type="button" id="doneGo">Lihat pesanan saya</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
